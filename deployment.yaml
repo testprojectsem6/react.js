@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: react-app
-          image: sem6persproject/test:latest # Image that will be used to containers in the cluster
+          image: testprojectsem6/react-app:latest # Image that will be used to containers in the cluster
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000 # The port that the container is running on in the cluster
