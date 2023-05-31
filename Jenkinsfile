@@ -1,7 +1,8 @@
 pipeline {
 
+
   environment {
-    dockerimagename = "bravinwasike/react-app"
+    dockerimagename = "sem6persproject/react-app"
     dockerImage = ""
   }
 
@@ -11,10 +12,10 @@ pipeline {
 
     stage('Checkout Source') {
       steps {
-        git 'https://github.com/Bravinsimiyu/jenkins-kubernetes-deployment.git'
+        checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/testprojectsem6/react.js/']]])
       }
     }
-
+  
     stage('Build image') {
       steps{
         script {
@@ -24,26 +25,26 @@ pipeline {
     }
 
     stage('Pushing Image') {
-      environment {
-               registryCredential = 'dockerhub-credentials'
-           }
       steps{
-        script {
-          docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
-            dockerImage.push("latest")
-          }
+        script{
+          withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
+           sh 'docker login -u sem6persproject -p ${dockerhubpwd}'
+           
+             }
+           sh 'docker push sem6persproject/react-app:latest'
+         }  
+ 
         }
-      }
     }
+      
+    
 
-    stage('Deploying App to Kubernetes') {
-      steps {
-        script {
-          kubernetesDeploy(configs: "deployment.yaml", "service.yaml")
+    stage('Deploy to k8s'){
+        steps{
+            script{
+                kubernetesDeploy (configs: 'deployment.yaml',kubeconfigId: 'k8sconfigpwd')
+                }
+            }
         }
-      }
     }
-
-  }
-
 }
